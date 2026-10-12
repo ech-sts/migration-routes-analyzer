@@ -151,3 +151,51 @@ test("summarizeRouteAnalysis generates consolidated summary with refugee perspec
   assert.equal(summary.perspectiveFeedback.narratives.length > 0, true);
   assert.equal(summary.perspectiveFeedback.reflectionQuestions.length, 4);
 });
+
+test("summarizeRouteAnalysis handles empty obstacles cleanly", () => {
+  const summary = summarizeRouteAnalysis([], DEFAULT_CONFIG, { routeCount: 0 });
+  assert.equal(summary.obstacleCount, 0);
+  assert.equal(summary.totalWeight, 0);
+  assert.equal(summary.averageWeight, 0);
+  assert.equal(summary.maxWeight, 0);
+  assert.equal(summary.perspectiveFeedback.risk.level, "Minimal Risk");
+  assert.equal(summary.perspectiveFeedback.categories.length, 0);
+});
+
+test("extractObstacleAttributes handles missing or invalid values gracefully", () => {
+  const raw = {
+    attributes: {
+      weight: "invalid-number",
+      description: null
+    }
+  };
+  const extracted = extractObstacleAttributes(raw, DEFAULT_CONFIG);
+  assert.equal(extracted.weight, 1); // Defaults to 1
+  assert.equal(extracted.title, "Obstacle"); // Default title
+  assert.equal(extracted.description, "No detailed description available.");
+});
+
+test("bufferRouteGeometries throws error when no geometries provided", () => {
+  assert.throws(() => {
+    bufferRouteGeometries([], 30, "kilometers", {});
+  }, /No route geometries provided/);
+});
+
+test("bufferRouteGeometries falls back to planar buffer if geodesicBuffer fails", () => {
+  let planarCalled = false;
+  const mockEngine = {
+    geodesicBuffer() {
+      throw new Error("Geodesic failed");
+    },
+    buffer(geoms, dist, unit, union) {
+      planarCalled = true;
+      return [{ type: "polygon" }];
+    }
+  };
+
+  const dummyGeom = { type: "polyline" };
+  const res = bufferRouteGeometries(dummyGeom, 25, "miles", mockEngine);
+  assert.equal(planarCalled, true);
+  assert.equal(res.type, "polygon");
+});
+
