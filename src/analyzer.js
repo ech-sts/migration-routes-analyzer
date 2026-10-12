@@ -37,7 +37,7 @@ export function findObstacleLayer(layers, targetTitle = "route-obstacles") {
   if (!matched) {
     matched = layerList.find((l) => {
       const title = (l.title || l.id || "").trim().toLowerCase();
-      return title.includes(targetLower) || targetLower.includes(title);
+      return title.length > 0 && (title.includes(targetLower) || targetLower.includes(title));
     });
   }
 

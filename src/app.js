@@ -3,7 +3,7 @@
  * Powered by ArcGIS Maps SDK for JavaScript
  */
 
-import { getConfig, saveConfig, resetConfig as clearConfig, DEFAULT_CONFIG } from "./config.js";
+import { getConfig, saveConfig, clearSavedConfig as clearConfig, DEFAULT_CONFIG } from "./config.js";
 import {
   findObstacleLayer,
   ensureObstacleLayerHidden,
@@ -541,6 +541,19 @@ function renderObstacleHighlights(intersectedObstacles) {
 }
 
 /**
+ * Helper to safely escape HTML entities and prevent XSS
+ */
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+/**
  * Renders the analysis summary and educational refugee perspective feedback in the panel
  */
 function renderAnalysisResults(summary) {
@@ -554,34 +567,34 @@ function renderAnalysisResults(summary) {
   const { totalWeight, obstacleCount, averageWeight, maxWeight, perspectiveFeedback, routeMetrics, buffer } = summary;
   const { risk, categories, narratives, reflectionQuestions } = perspectiveFeedback;
 
-  // Build HTML
+  // Build HTML with properly escaped values
   let html = `
     <div class="result-card overview-card">
-      <div class="risk-badge-banner" style="background-color: ${risk.color}">
-        <span class="risk-badge-label">${risk.level}</span>
-        <span class="risk-badge-score">Total Difficulty Score: ${totalWeight}</span>
+      <div class="risk-badge-banner" style="background-color: ${escapeHtml(risk.color)}">
+        <span class="risk-badge-label">${escapeHtml(risk.level)}</span>
+        <span class="risk-badge-score">Total Difficulty Score: ${escapeHtml(totalWeight)}</span>
       </div>
-      <p class="risk-narrative">${risk.description}</p>
+      <p class="risk-narrative">${escapeHtml(risk.description)}</p>
 
       <div class="metrics-grid">
         <div class="metric-box">
-          <div class="metric-value">${obstacleCount}</div>
+          <div class="metric-value">${escapeHtml(obstacleCount)}</div>
           <div class="metric-label">Obstacles Encountered</div>
         </div>
         <div class="metric-box">
-          <div class="metric-value">${averageWeight}</div>
+          <div class="metric-value">${escapeHtml(averageWeight)}</div>
           <div class="metric-label">Avg Difficulty Weight</div>
         </div>
         <div class="metric-box">
-          <div class="metric-value">${maxWeight}/10</div>
+          <div class="metric-value">${escapeHtml(maxWeight)}/10</div>
           <div class="metric-label">Peak Threat Level</div>
         </div>
         <div class="metric-box">
-          <div class="metric-value">${buffer.distance} ${buffer.unit}</div>
+          <div class="metric-value">${escapeHtml(buffer.distance)} ${escapeHtml(buffer.unit)}</div>
           <div class="metric-label">Buffer Corridor</div>
         </div>
       </div>
-      ${routeMetrics.totalLengthKm ? `<div class="route-length-note">Estimated route length: <strong>${routeMetrics.totalLengthKm} km</strong> across ${routeMetrics.routeCount} sketched path(s)</div>` : ""}
+      ${routeMetrics.totalLengthKm ? `<div class="route-length-note">Estimated route length: <strong>${escapeHtml(routeMetrics.totalLengthKm)} km</strong> across ${escapeHtml(routeMetrics.routeCount)} sketched path(s)</div>` : ""}
     </div>
 
     <!-- Educational Refugee Perspective Section -->
@@ -600,7 +613,7 @@ function renderAnalysisResults(summary) {
             (nar) => `
           <div class="narrative-item">
             <span class="narrative-bullet">⚠️</span>
-            <div class="narrative-text">${nar}</div>
+            <div class="narrative-text">${escapeHtml(nar)}</div>
           </div>
         `
           )
@@ -611,7 +624,7 @@ function renderAnalysisResults(summary) {
         <h4>Student Reflection & Inquiry Questions</h4>
         <ul>
           ${reflectionQuestions
-            .map((q) => `<li><strong>•</strong> ${q}</li>`)
+            .map((q) => `<li><strong>•</strong> ${escapeHtml(q)}</li>`)
             .join("")}
         </ul>
       </div>
@@ -630,8 +643,8 @@ function renderAnalysisResults(summary) {
             return `
             <div class="category-bar-row">
               <div class="category-info">
-                <span class="category-name">${cat.name} (${cat.count})</span>
-                <span class="category-weight">${cat.totalWeight} pts (${pct}%)</span>
+                <span class="category-name">${escapeHtml(cat.name)} (${escapeHtml(cat.count)})</span>
+                <span class="category-weight">${escapeHtml(cat.totalWeight)} pts (${pct}%)</span>
               </div>
               <div class="progress-track">
                 <div class="progress-fill" style="width: ${pct}%;"></div>
@@ -647,7 +660,7 @@ function renderAnalysisResults(summary) {
     <div class="result-card obstacles-card">
       <div class="card-header">
         <span class="card-icon">🛑</span>
-        <h3>Encountered Difficulties Along Route (${obstacleCount})</h3>
+        <h3>Encountered Difficulties Along Route (${escapeHtml(obstacleCount)})</h3>
       </div>
       ${
         obstacleCount === 0
@@ -658,16 +671,16 @@ function renderAnalysisResults(summary) {
             .map((obs, idx) => {
               const weightClass = obs.weight >= 8 ? "weight-severe" : obs.weight >= 5 ? "weight-moderate" : "weight-low";
               return `
-              <div class="obstacle-item" data-id="${obs.id}">
+              <div class="obstacle-item" data-id="${escapeHtml(obs.id)}">
                 <div class="obstacle-item-header">
-                  <span class="obstacle-title">${idx + 1}. ${obs.title}</span>
-                  <span class="obstacle-weight-badge ${weightClass}">Weight: ${obs.weight}</span>
+                  <span class="obstacle-title">${idx + 1}. ${escapeHtml(obs.title)}</span>
+                  <span class="obstacle-weight-badge ${weightClass}">Weight: ${escapeHtml(obs.weight)}</span>
                 </div>
-                <div class="obstacle-category-tag">${obs.category}</div>
-                <div class="obstacle-description">${obs.description}</div>
+                <div class="obstacle-category-tag">${escapeHtml(obs.category)}</div>
+                <div class="obstacle-description">${escapeHtml(obs.description)}</div>
                 ${
                   obs.perspectiveNote
-                    ? `<div class="obstacle-perspective-note"><em>"${obs.perspectiveNote}"</em></div>`
+                    ? `<div class="obstacle-perspective-note"><em>"${escapeHtml(obs.perspectiveNote)}"</em></div>`
                     : ""
                 }
               </div>

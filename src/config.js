@@ -158,6 +158,8 @@ export function clearSavedConfig() {
   }
 }
 
+export const resetConfig = clearSavedConfig;
+
 /**
  * Returns the effective consolidated configuration by merging:
  * 1. DEFAULT_CONFIG

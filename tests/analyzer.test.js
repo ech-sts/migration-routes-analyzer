@@ -14,6 +14,7 @@ import { DEFAULT_CONFIG } from "../src/config.js";
 
 test("findObstacleLayer finds layer by exact or case-insensitive title", () => {
   const layers = [
+    { id: "", title: "" },
     { id: "base-layer", title: "World Topo" },
     { id: "layer-1", title: "Route-Obstacles" },
     { id: "layer-2", title: "Cities" }
