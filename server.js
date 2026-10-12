@@ -16,7 +16,12 @@ const MIME_TYPES = {
   ".png": "image/png",
   ".jpg": "image/jpeg",
   ".svg": "image/svg+xml",
-  ".ico": "image/x-icon"
+  ".ico": "image/x-icon",
+  ".woff": "font/woff",
+  ".woff2": "font/woff2",
+  ".ttf": "font/ttf",
+  ".wasm": "application/wasm",
+  ".gif": "image/gif"
 };
 
 const server = http.createServer((req, res) => {
@@ -30,7 +35,12 @@ const server = http.createServer((req, res) => {
 
   // Resolve file path within repository directory
   const safePath = path.normalize(reqPath).replace(/^(\.\.[\/\\])+/, "");
-  const filePath = path.join(__dirname, safePath);
+
+  // Check dist directory first if built, else root
+  let filePath = path.join(__dirname, "dist", safePath);
+  if (!fs.existsSync(filePath)) {
+    filePath = path.join(__dirname, safePath);
+  }
 
   // Security check: ensure path stays within root
   if (!filePath.startsWith(__dirname)) {

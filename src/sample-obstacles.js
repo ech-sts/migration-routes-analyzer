@@ -189,7 +189,29 @@ export const SAMPLE_OBSTACLES = [
   }
 ];
 
+export const sampleObstacles = {
+  type: "FeatureCollection",
+  features: SAMPLE_OBSTACLES.map((obs, idx) => ({
+    type: "Feature",
+    id: obs.id || idx + 1,
+    geometry: {
+      type: "Point",
+      coordinates: [obs.geometry.longitude, obs.geometry.latitude]
+    },
+    properties: {
+      OBJECTID: idx + 1,
+      id: obs.id,
+      title: obs.title,
+      category: obs.category,
+      weight: obs.weight,
+      description: obs.description,
+      perspectiveNote: obs.perspectiveNote
+    }
+  }))
+};
+
 // Global window fallback
 if (typeof window !== "undefined") {
   window.SAMPLE_OBSTACLES = SAMPLE_OBSTACLES;
+  window.sampleObstacles = sampleObstacles;
 }

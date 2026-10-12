@@ -18,10 +18,13 @@ This application challenges students to **take the perspective of refugees**:
 
 ## ✨ Features
 
-- **ArcGIS Maps SDK for JavaScript (v4.31)**: Full integration with `WebMap`, `MapView`, `Sketch`, `GraphicsLayer`, and `geometryEngine`.
+- **React 18 + Vite**: High-performance, modern React architecture with modular components.
+- **ArcGIS Map Components (`@arcgis/map-components`)**: Declarative ArcGIS web components including `<arcgis-map>`, `<arcgis-zoom>`, and `<arcgis-scale-bar>`.
+- **Esri Calcite UI (`@esri/calcite-components`)**: Beautiful, accessible, enterprise-grade design system following Esri best practices with `<calcite-shell>`, `<calcite-navigation>`, `<calcite-panel>`, `<calcite-dialog>`, `<calcite-card>`, `<calcite-chip>`, and `<calcite-notice>`.
+- **ArcGIS Maps SDK for JavaScript**: Deep integration with `WebMap`, `MapView`, `Sketch`, `GraphicsLayer`, and `geometryEngine`.
 - **Route Sketching & Editing**: Intuitive polyline sketching using the ArcGIS `Sketch` widget with custom line styling and route distance metrics.
 - **Geodesic Buffering**: Configurable corridor buffering (e.g. 30 km) using `geometryEngine.geodesicBuffer` to accurately model the route's sphere of interaction across continental distances.
-- **Invisible Obstacles Layer**: The `route-obstacles` layer is hidden on the map (`visible = false`) to represent the unseen dangers that refugees cannot anticipate until they encounter them.
+- **Invisible Obstacles Layer**: The `route-obstacles` layer is hidden on the map (`visible = false`, `listMode = "hide"`) to represent the unseen dangers that refugees cannot anticipate until they encounter them.
 - **Difficulty Weights & Descriptions**: Each obstacle has a severity weight (1–10) and description.
 - **Spatial Intersection & Aggregation**: Buffer polygons intersect with the obstacles layer to compute:
   - Total cumulative difficulty score
@@ -31,7 +34,7 @@ This application challenges students to **take the perspective of refugees**:
 - **Interactive Map Feedback**: Highlights triggered obstacles on the map after analysis, allowing students to click obstacles in the summary to zoom directly to their locations.
 - **Refugee Perspective & Inquiry Prompts**: Structured reflection questions guiding classroom discussions on asylum policies, border closures, and humanitarian needs.
 - **High Configurability**: WebMap ID, buffer distance, units, layer title, and attribute field names can be configured in:
-  1. The built-in **Settings Modal** (saved in browser `localStorage`)
+  1. The built-in **Settings Dialog** (saved in browser `localStorage`)
   2. **URL Query Parameters** (enabling teachers to generate one-click shareable assignment links)
   3. `src/config.js`
 - **Zero-Dependency Fallback & Standalone Mode**: If the WebMap ID is not specified or offline, the app seamlessly activates a rich dataset of realistic sample obstacles so the app is always fully interactive.
@@ -65,14 +68,23 @@ https://example.com/?webmap=YOUR_WEBMAP_ID&buffer=40&unit=kilometers&layer=route
 ### Prerequisites
 - Node.js v18+ (tested on Node.js v22)
 
-### Running Locally
-To launch the application using the built-in HTTP server:
+### Development Server
+```bash
+npm run dev
+```
+
+### Building for Production
+```bash
+npm run build
+```
+
+### Previewing Production Build
+```bash
+npm run preview
+```
+or launch the included production server:
 ```bash
 npm start
-```
-Then navigate to:
-```
-http://localhost:3000
 ```
 
 ### Running Tests
@@ -87,20 +99,26 @@ npm test
 
 ```
 migration-routes-analyzer/
-├── index.html              # Main responsive web application markup
-├── server.js               # Zero-dependency local development server
-├── package.json            # Project manifest, scripts, and metadata
-├── README.md               # Documentation and pedagogical guide
-├── css/
-│   └── style.css           # Modern, responsive UI stylesheet
+├── index.html                  # Vite + React HTML template
+├── vite.config.js              # Vite configuration with React plugin
+├── server.js                   # Production static asset server
+├── package.json                # Project manifest, scripts, and dependencies
+├── README.md                   # Documentation and pedagogical guide
 ├── src/
-│   ├── app.js              # Application controller & ArcGIS SDK integration
-│   ├── analyzer.js         # Buffering, spatial intersection & perspective logic
-│   ├── config.js           # Configuration manager (defaults, URL params, storage)
-│   └── sample-obstacles.js # Realistic fallback refugee obstacles dataset
+│   ├── main.jsx                # React root and component registration
+│   ├── App.jsx                 # Main application shell with Calcite Shell
+│   ├── analyzer.js             # Buffering, spatial intersection & perspective logic
+│   ├── config.js               # Configuration manager (defaults, URL params, storage)
+│   ├── sample-obstacles.js     # Realistic fallback refugee obstacles dataset
+│   └── components/
+│       ├── Header.jsx          # Calcite navigation header with action buttons
+│       ├── MapContainer.jsx    # ArcGIS Map Component, Sketch & analysis pipeline
+│       ├── AnalysisPanel.jsx   # Results panel with difficulty metrics & inquiry prompts
+│       ├── SettingsModal.jsx   # Calcite dialog for non-static parameter configuration
+│       └── GuideModal.jsx      # Educational guide dialog explaining refugee journey context
 └── tests/
-    ├── analyzer.test.js    # Unit tests for spatial analysis & risk evaluation
-    └── config.test.js      # Unit tests for configuration & URL parameters
+    ├── analyzer.test.js        # Unit tests for spatial analysis & risk evaluation
+    └── config.test.js          # Unit tests for configuration & URL parameters
 ```
 
 ---
