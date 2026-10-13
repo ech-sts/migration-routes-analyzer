@@ -8,7 +8,7 @@
 export const DEFAULT_CONFIG = {
   // ArcGIS Online WebMap Item ID
   // Can be configured to any webmap containing the route-obstacles layer
-  webmapId: "433c2a6b28f84737a4d538e14674724b",
+  webmapId: "5688732d6f59462c842d450b5c9bb584",
 
   // Portal URL for ArcGIS Online or ArcGIS Enterprise
   portalUrl: "https://www.arcgis.com",
@@ -17,7 +17,7 @@ export const DEFAULT_CONFIG = {
   apiKey: "",
 
   // Layer title in the WebMap that contains the invisible route obstacles
-  obstacleLayerTitle: "route-obstacles",
+  obstacleLayerTitle: "Routenschwierigkeiten",
 
   // Buffer distance around the user's sketched migration route
   bufferDistance: 30,
@@ -26,10 +26,10 @@ export const DEFAULT_CONFIG = {
   bufferUnit: "kilometers",
 
   // Attribute field names for obstacle data with fallback search
-  weightField: "weight",
-  descriptionField: "description",
-  titleField: "title",
-  categoryField: "category",
+  weightField: "Weight",
+  descriptionField: "Description",
+  titleField: "Title",
+  categoryField: "ObstacleType",
 
   // Initial map center [longitude, latitude] focusing on Mediterranean, Middle East, North Africa, Europe
   defaultCenter: [18.0, 34.0],
