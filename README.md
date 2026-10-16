@@ -93,6 +93,23 @@ To run the automated unit test suite:
 npm test
 ```
 
+### GitHub Pages
+
+The app is published at **https://ech-sts.github.io/migration-routes-analyzer/** after a successful deployment.
+
+To enable deployment, open the repository's **Settings → Pages → Build and deployment** and select **GitHub Actions** as the source.
+
+The **Deploy app to GitHub Pages** workflow (`.github/workflows/pages.yml`) runs on pushes to `main` and can also be started manually from the **Actions** tab. It installs dependencies with `npm ci`, builds the app using Node.js 22, uploads `dist/` as a Pages artifact, and deploys it to the `github-pages` environment. No separate `gh-pages` branch or committed build output is needed.
+
+The workflow uses the base path provided by GitHub Pages so assets load correctly under `/migration-routes-analyzer/` (or a configured custom domain), without changing local development defaults.
+
+To preview the project-site build locally:
+```bash
+npm run build -- --base /migration-routes-analyzer/
+npm run preview
+```
+Then open `http://localhost:4173/migration-routes-analyzer/`.
+
 ---
 
 ## 📁 Project Structure
