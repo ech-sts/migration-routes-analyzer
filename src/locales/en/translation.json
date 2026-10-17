@@ -28,14 +28,14 @@
     "noObstacles": "No obstacles intersected within the {{distance}} {{unit}} corridor.",
     "weight": "Weight: {{weight}}",
     "perspective": "Perspective:",
-    "categorySummary_one": "{{count}} obstacle • Total Weight: {{weight}}",
-    "categorySummary_other": "{{count}} obstacles • Total Weight: {{weight}}"
+    "categorySummary_one": "{{count}} obstacle",
+    "categorySummary_other": "{{count}} obstacles"
   },
   "guide": {
     "title": "How to Analyze a Migration Route",
     "sketch": "<strong>Sketch a Route:</strong> Click the <em>Draw Route Polyline</em> button on the map to trace a route from an origin (e.g., Syria, Afghanistan, Libya) toward a European destination.",
     "analyze": "<strong>Run Analysis:</strong> Click the <em>Analyze Route</em> button in the header.",
-    "perspective": "<strong>Take the Perspective of Refugees:</strong> Review the hidden perils, cumulative difficulty weights, and reflective questions to consider the extreme challenges of forced displacement.",
+    "perspective": "<strong>Take the Perspective of Refugees:</strong> Consider the documented obstacles and reflection questions to understand the challenges and uncertainties of forced displacement. Every journey to safety carries risks, regardless of the obstacles recorded here.",
     "purposeTitle": "Pedagogical Purpose",
     "purpose": "Refugees fleeing persecution and war face information asymmetry: militarized border fences, pushbacks, maritime perils, and deportation camps are not clearly marked on ordinary maps. By simulating routes against unseen obstacles, students experience the daunting uncertainty faced by displaced persons.",
     "readGuide": "Read Educational Guide"

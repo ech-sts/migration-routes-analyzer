@@ -1,7 +1,7 @@
 /**
  * Analyzer module for Refugee Migration Routes
  * Handles buffering of sketched route polylines, spatial intersection
- * with invisible obstacle layer, difficulty weight aggregation,
+ * with invisible obstacle layer
  * and educational perspective feedback generation.
  */
 
@@ -238,9 +238,6 @@ export function intersectBufferWithObstacles(
     }
   }
 
-  // Sort by weight descending so most severe obstacles are highlighted first
-  results.sort((a, b) => b.weight - a.weight);
-
   return results;
 }
 
@@ -305,8 +302,6 @@ export function evaluateJourneyRisk(totalWeight, thresholds = DEFAULT_CONFIG.ris
  * Encourages students to take the perspective of refugees and reflect on the reality of forced displacement.
  */
 export function generateRefugeePerspectiveFeedback(intersectedObstacles, totalWeight, config = DEFAULT_CONFIG) {
-  const risk = evaluateJourneyRisk(totalWeight, config?.riskThresholds);
-
   // Group obstacles by category
   const categories = {};
   for (const obs of intersectedObstacles) {
@@ -315,12 +310,10 @@ export function generateRefugeePerspectiveFeedback(intersectedObstacles, totalWe
       categories[cat] = {
         name: cat,
         count: 0,
-        totalWeight: 0,
         obstacles: []
       };
     }
     categories[cat].count += 1;
-    categories[cat].totalWeight += obs.weight;
     categories[cat].obstacles.push(obs);
   }
 
@@ -377,7 +370,6 @@ export function generateRefugeePerspectiveFeedback(intersectedObstacles, totalWe
   ];
 
   return {
-    risk,
     categories: Object.values(categories),
     narratives,
     narrativeKeys,
@@ -392,27 +384,20 @@ export function generateRefugeePerspectiveFeedback(intersectedObstacles, totalWe
 export function summarizeRouteAnalysis(intersectedObstacles, config = DEFAULT_CONFIG, routeMetrics = {}) {
   const obstacles = Array.isArray(intersectedObstacles) ? intersectedObstacles : [];
   const obstacleCount = obstacles.length;
-  const totalWeight = obstacles.reduce((sum, obs) => sum + (obs.weight || 0), 0);
-  const roundedTotalWeight = Math.round(totalWeight * 10) / 10;
-  const averageWeight = obstacleCount > 0 ? Math.round((totalWeight / obstacleCount) * 10) / 10 : 0;
-  const maxWeight = obstacles.reduce((max, obs) => Math.max(max, obs.weight || 0), 0);
 
-  const perspectiveFeedback = generateRefugeePerspectiveFeedback(obstacles, roundedTotalWeight, config);
+  const perspectiveFeedback = generateRefugeePerspectiveFeedback(obstacles, undefined, config);
 
   return {
     timestamp: new Date().toISOString(),
     routeMetrics: {
       routeCount: routeMetrics.routeCount || 1,
-      totalLengthKm: routeMetrics.totalLengthKm ? Math.round(routeMetrics.totalLengthKm * 10) / 10 : null
+      totalLengthKm: routeMetrics.totalLengthKm != null ? Math.round(routeMetrics.totalLengthKm * 10) / 10 : null
     },
     buffer: {
       distance: config.bufferDistance,
       unit: config.bufferUnit
     },
     obstacleCount,
-    totalWeight: roundedTotalWeight,
-    averageWeight,
-    maxWeight,
     obstacles,
     perspectiveFeedback
   };

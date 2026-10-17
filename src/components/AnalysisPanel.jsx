@@ -32,20 +32,12 @@ export default function AnalysisPanel({
   const getLocalizedReport = () => {
     if (!analysis) return null;
     const feedback = analysis.perspectiveFeedback;
-    const risk = feedback?.risk;
 
     return {
       ...analysis,
       perspectiveFeedback: feedback
         ? {
             ...feedback,
-            risk: risk
-              ? {
-                  ...risk,
-                  level: risk.levelKey ? t(risk.levelKey) : risk.level,
-                  description: risk.descriptionKey ? t(risk.descriptionKey) : risk.description
-                }
-              : risk,
             narratives: feedback.narrativeKeys?.map((key) => t(key)) || feedback.narratives,
             reflectionQuestions:
               feedback.reflectionQuestionKeys?.map((key) => t(key)) || feedback.reflectionQuestions
@@ -165,7 +157,7 @@ export default function AnalysisPanel({
             </calcite-notice>
 
             <calcite-card style={{ marginTop: "0.5rem" }}>
-              <div slot="title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <div slot="heading" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <calcite-icon icon="lightbulb" scale="s" />
                 <span>{t("guide.purposeTitle")}</span>
               </div>
@@ -183,7 +175,7 @@ export default function AnalysisPanel({
 
         {analysis && !analyzing && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {/* Risk Overview Banner */}
+            {/*
             {(() => {
               const risk = analysis.perspectiveFeedback?.risk;
               const kind =
@@ -209,12 +201,13 @@ export default function AnalysisPanel({
                 </calcite-notice>
               );
             })()}
+            */}
 
             {/* Quick Metrics Grid */}
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(3, 1fr)",
+                gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
                 gap: "0.5rem",
                 textAlign: "center"
               }}
@@ -226,7 +219,7 @@ export default function AnalysisPanel({
                   borderRadius: "6px"
                 }}
               >
-                <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "var(--calcite-color-brand, #007ac2)" }}>
+                <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "var(--calcite-color-text-1)" }}>
                   {analysis.obstacleCount}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--calcite-color-text-2)" }}>
@@ -241,36 +234,19 @@ export default function AnalysisPanel({
                   borderRadius: "6px"
                 }}
               >
-                <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#e53e3e" }}>
-                  {analysis.totalWeight}
-                </div>
-                <div style={{ fontSize: "0.75rem", color: "var(--calcite-color-text-2)" }}>
-                  {t("analysis.cumulativeWeight")}
-                </div>
-              </div>
-
-              <div
-                style={{
-                  backgroundColor: "var(--calcite-color-foreground-2, #f3f3f3)",
-                  padding: "0.75rem",
-                  borderRadius: "6px"
-                }}
-              >
-                <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#dd6b20" }}>
-                  {analysis.routeMetrics?.totalLengthKm
+                <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "var(--calcite-color-text-1)" }}>
+                  {analysis.routeMetrics?.totalLengthKm != null
                     ? `${analysis.routeMetrics.totalLengthKm} km`
-                    : `${config.bufferDistance} ${t(`units.${config.bufferUnit}`)}`}
+                    : "-"}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--calcite-color-text-2)" }}>
-                  {analysis.routeMetrics?.totalLengthKm
-                    ? t("analysis.routeLength")
-                    : t("analysis.corridorWidth")}
+                  {t("analysis.routeLength")}
                 </div>
               </div>
             </div>
 
             {/* Navigation Tabs */}
-            <div style={{ display: "flex", gap: "0.5rem", borderBottom: "1px solid var(--calcite-color-border-2, #e0e0e0)", paddingBottom: "0.5rem" }}>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", borderBottom: "1px solid var(--calcite-color-border-2, #e0e0e0)", paddingBottom: "0.5rem" }}>
               <calcite-button
                 appearance={activeTab === "perspective" ? "solid" : "outline"}
                 kind={activeTab === "perspective" ? "brand" : "neutral"}
@@ -312,7 +288,7 @@ export default function AnalysisPanel({
                           backgroundColor: "var(--calcite-color-foreground-2, #f8f9fa)",
                           padding: "0.75rem",
                           borderRadius: "6px",
-                          borderLeft: "4px solid #dd6b20",
+                          borderLeft: "4px solid var(--calcite-color-border-2)",
                           fontSize: "0.85rem",
                           lineHeight: "1.45"
                         }}
@@ -330,7 +306,7 @@ export default function AnalysisPanel({
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                     {reflectionQuestions.map((q, idx) => (
                       <calcite-card key={idx} style={{ width: "100%" }}>
-                        <div slot="title" style={{ fontSize: "0.85rem", fontWeight: "normal", lineHeight: "1.4" }}>
+                        <div slot="heading" style={{ fontSize: "0.85rem", fontWeight: "normal", lineHeight: "1.4" }}>
                           <strong>{t("analysis.questionNumber", { number: idx + 1 })}</strong> {q}
                         </div>
                       </calcite-card>
@@ -354,7 +330,7 @@ export default function AnalysisPanel({
                   analysis.obstacles.map((obs, idx) => (
                     <calcite-card key={obs.id || idx} style={{ width: "100%" }}>
                       <div
-                        slot="title"
+                        slot="heading"
                         style={{
                           display: "flex",
                           justifyContent: "space-between",
@@ -365,12 +341,9 @@ export default function AnalysisPanel({
                       >
                         <span>{obs.title}</span>
                       </div>
-                      <div slot="subtitle" style={{ display: "flex", gap: "0.3rem", marginTop: "0.2rem" }}>
+                      <div slot="description" style={{ display: "flex", gap: "0.3rem", marginTop: "0.2rem" }}>
                         <calcite-chip scale="s" kind="brand">
                           {obs.category}
-                        </calcite-chip>
-                        <calcite-chip scale="s" kind="danger">
-                          {t("analysis.weight", { weight: obs.weight })}
                         </calcite-chip>
                       </div>
                       <p style={{ fontSize: "0.85rem", margin: "0.5rem 0 0.25rem 0", lineHeight: "1.4" }}>
@@ -402,14 +375,11 @@ export default function AnalysisPanel({
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 {analysis.perspectiveFeedback?.categories?.map((cat, idx) => (
                   <calcite-card key={idx} style={{ width: "100%" }}>
-                    <div slot="title" style={{ fontSize: "0.9rem", fontWeight: "600" }}>
+                    <div slot="heading" style={{ fontSize: "0.9rem", fontWeight: "600" }}>
                       {cat.name}
                     </div>
-                    <div slot="subtitle">
-                      {t("analysis.categorySummary", {
-                        count: cat.count,
-                        weight: cat.totalWeight
-                      })}
+                    <div slot="description">
+                      {t("analysis.categorySummary", { count: cat.count })}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginTop: "0.5rem" }}>
                       {cat.obstacles.map((o, oIdx) => (
@@ -424,7 +394,6 @@ export default function AnalysisPanel({
                           }}
                         >
                           <span>{o.title}</span>
-                          <span style={{ fontWeight: "bold", color: "#e53e3e" }}>+{o.weight}</span>
                         </div>
                       ))}
                     </div>

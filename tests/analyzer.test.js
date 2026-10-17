@@ -122,7 +122,7 @@ test("buildObstacleIntersectionQuery requests intersecting features in buffer sp
   assert.equal(query.outSpatialReference, bufferGeometry.spatialReference);
 });
 
-test("intersectBufferWithObstacles correctly filters and sorts by weight descending", () => {
+test("intersectBufferWithObstacles filters without ranking obstacles by weight", () => {
   const mockEngine = {
     intersects(buffer, geom) {
       return geom.shouldIntersect === true;
@@ -147,11 +147,10 @@ test("intersectBufferWithObstacles correctly filters and sorts by weight descend
 
   const results = intersectBufferWithObstacles(dummyBuffer, features, mockEngine, DEFAULT_CONFIG);
   assert.equal(results.length, 2);
-  // Checked sorting by weight descending
-  assert.equal(results[0].title, "Severe Risk Obstacle");
-  assert.equal(results[0].weight, 9);
-  assert.equal(results[1].title, "Low Risk Obstacle");
-  assert.equal(results[1].weight, 3);
+  assert.equal(results[0].title, "Low Risk Obstacle");
+  assert.equal(results[0].weight, 3);
+  assert.equal(results[1].title, "Severe Risk Obstacle");
+  assert.equal(results[1].weight, 9);
 });
 
 test("evaluateJourneyRisk calculates appropriate risk level and styling", () => {
@@ -181,10 +180,11 @@ test("summarizeRouteAnalysis generates consolidated summary with refugee perspec
   const summary = summarizeRouteAnalysis(obstacles, DEFAULT_CONFIG, { routeCount: 1, totalLengthKm: 420.5 });
 
   assert.equal(summary.obstacleCount, 2);
-  assert.equal(summary.totalWeight, 18);
-  assert.equal(summary.averageWeight, 9);
-  assert.equal(summary.maxWeight, 10);
-  assert.equal(summary.perspectiveFeedback.risk.levelKey, "risk.levels.moderate");
+  assert.equal("totalWeight" in summary, false);
+  assert.equal("averageWeight" in summary, false);
+  assert.equal("maxWeight" in summary, false);
+  assert.equal("risk" in summary.perspectiveFeedback, false);
+  assert.equal(summary.perspectiveFeedback.categories.some((category) => "totalWeight" in category), false);
   assert.equal(summary.perspectiveFeedback.categories.length, 2);
   assert.equal(summary.perspectiveFeedback.narrativeKeys.length > 0, true);
   assert.equal(summary.perspectiveFeedback.reflectionQuestionKeys.length, 4);
@@ -193,11 +193,38 @@ test("summarizeRouteAnalysis generates consolidated summary with refugee perspec
 test("summarizeRouteAnalysis handles empty obstacles cleanly", () => {
   const summary = summarizeRouteAnalysis([], DEFAULT_CONFIG, { routeCount: 0 });
   assert.equal(summary.obstacleCount, 0);
-  assert.equal(summary.totalWeight, 0);
-  assert.equal(summary.averageWeight, 0);
-  assert.equal(summary.maxWeight, 0);
-  assert.equal(summary.perspectiveFeedback.risk.levelKey, "risk.levels.minimal");
+  assert.equal("risk" in summary.perspectiveFeedback, false);
   assert.equal(summary.perspectiveFeedback.categories.length, 0);
+});
+
+test("route feedback does not depend on obstacle weights or risk thresholds", () => {
+  const obstacles = [{ title: "Crossing", category: "Maritime", weight: 1 }];
+  const feedback = generateRefugeePerspectiveFeedback(obstacles, 1);
+  const changedFeedback = generateRefugeePerspectiveFeedback(
+    [{ ...obstacles[0], weight: 1000 }],
+    1000,
+    { riskThresholds: { low: 0, moderate: 0, high: 0 } }
+  );
+
+  assert.deepEqual(changedFeedback.narrativeKeys, feedback.narrativeKeys);
+  assert.deepEqual(changedFeedback.reflectionQuestionKeys, feedback.reflectionQuestionKeys);
+  assert.equal("risk" in changedFeedback, false);
+  assert.equal("totalWeight" in changedFeedback.categories[0], false);
+});
+
+test("extractObstacleAttributes uses the configured titleField before fallback titles", () => {
+  const obstacle = extractObstacleAttributes(
+    { attributes: { ObstacleTitle: "Grenzuebergang", title: "Fallback", Description: "Beschreibung" } },
+    { ...DEFAULT_CONFIG, titleField: "ObstacleTitle" }
+  );
+
+  assert.equal(obstacle.title, "Grenzuebergang");
+  assert.equal(obstacle.description, "Beschreibung");
+});
+
+test("summarizeRouteAnalysis preserves a zero route length", () => {
+  const summary = summarizeRouteAnalysis([], DEFAULT_CONFIG, { totalLengthKm: 0 });
+  assert.equal(summary.routeMetrics.totalLengthKm, 0);
 });
 
 test("extractObstacleAttributes handles missing or invalid values gracefully", () => {
