@@ -1,0 +1,78 @@
+{
+  "analysis": {
+    "title": "Routenanalyse und Rückmeldung",
+    "subtitle": "Perspektiven auf Fluchtwege",
+    "description_one": "{{count}} Hindernis analysiert ({{distance}}-{{unit}}-Korridor)",
+    "description_other": "{{count}} Hindernisse analysiert ({{distance}}-{{unit}}-Korridor)",
+    "language": "Sprache",
+    "copyReport": "Bericht kopieren",
+    "copied": "Kopiert!",
+    "copyTooltip": "Analysebericht in die Zwischenablage kopieren",
+    "downloadJson": "JSON herunterladen",
+    "downloadTooltip": "Analysebericht als JSON herunterladen",
+    "closePanel": "Fenster schließen",
+    "collapsePanel": "Analysefenster einklappen",
+    "loading": "Korridor und darin liegende, nicht sichtbare Routenhindernisse werden analysiert ...",
+    "reportFilename": "migrationsrouten-analyse-{{timestamp}}.json",
+    "complete": "Analyse abgeschlossen",
+    "riskSummary": "{{level}} — Gesamtschwierigkeit: {{weight}}",
+    "obstacles": "Hindernisse",
+    "cumulativeWeight": "Gesamtschwierigkeit",
+    "routeLength": "Routenlänge",
+    "corridorWidth": "Korridorbreite",
+    "perspectiveTab": "Perspektive Geflüchteter",
+    "categoriesTab": "Kategorien",
+    "realitiesHeading": "Die Realität des Fluchtwegs",
+    "reflectionHeading": "Fragen zur Reflexion",
+    "questionNumber": "Frage {{number}}:",
+    "noObstacles": "Im {{distance}}-{{unit}}-Korridor wurden keine Hindernisse gefunden.",
+    "weight": "Gewichtung: {{weight}}",
+    "perspective": "Perspektive:",
+    "categorySummary_one": "{{count}} Hindernis • Gesamtgewicht: {{weight}}",
+    "categorySummary_other": "{{count}} Hindernisse • Gesamtgewicht: {{weight}}"
+  },
+  "guide": {
+    "title": "So analysierst du eine Migrationsroute",
+    "sketch": "<strong>Route einzeichnen:</strong> Zeichne mit der Schaltfläche <em>Routenlinie zeichnen</em> auf der Karte einen Weg vom Herkunftsort (z. B. Syrien, Afghanistan oder Libyen) zu einem Ziel in Europa.",
+    "analyze": "<strong>Analyse starten:</strong> Klicke oben auf <em>Route analysieren</em>.",
+    "perspective": "<strong>Die Perspektive Geflüchteter einnehmen:</strong> Sieh dir die verborgenen Gefahren, die addierten Schwierigkeitswerte und die Reflexionsfragen an, um die extremen Herausforderungen einer Flucht nachzuvollziehen.",
+    "purposeTitle": "Pädagogischer Zweck",
+    "purpose": "Menschen, die vor Verfolgung und Krieg fliehen, fehlt oft entscheidende Information: Bewachte Grenzzäune, Zurückweisungen, Gefahren auf dem Meer und Abschiebelager sind auf gewöhnlichen Karten nicht klar erkennbar. Durch die Routenanalyse erleben Lernende die große Unsicherheit, mit der Vertriebene konfrontiert sind.",
+    "readGuide": "Lernleitfaden lesen"
+  },
+  "risk": {
+    "levels": {
+      "minimal": "Minimales Risiko",
+      "low": "Geringes Risiko",
+      "moderate": "Mäßiges Risiko",
+      "high": "Hohes Risiko",
+      "critical": "Akute Gefahr"
+    },
+    "descriptions": {
+      "minimal": "Im Korridor wurden keine wesentlichen dokumentierten Hindernisse festgestellt. Unerwartete Kontrollpunkte oder veränderte Grenzkontrollen sind dennoch möglich.",
+      "low": "Geringe Konzentration größerer dokumentierter Hindernisse. Geflüchtete sind dennoch körperlicher Erschöpfung, unsicherem Aufenthaltsstatus und unerwarteten Grenzänderungen ausgesetzt.",
+      "moderate": "Erhebliche Barrieren wurden festgestellt. Die Route führt durch gefährliches Gelände, aktive Grenzblockaden oder riskante Transitgebiete, die gefährliche Umwege erfordern können.",
+      "high": "Schwere Gefahren sind vorhanden. Mehrere lebensbedrohliche Risiken wie offene See, militarisierte Grenzen oder Wüstenkorridore stehen mit dokumentierten humanitären Krisen und Menschenrechtsverletzungen in Verbindung.",
+      "critical": "Extreme, mehrstufige Gefahr. Der Korridor führt über einige der gefährlichsten Kontroll- und Übergangspunkte auf Fluchtrouten nach Europa. Es besteht ein sehr hohes Risiko für Tod, Gewalt oder langfristige Inhaftierung."
+    }
+  },
+  "narratives": {
+    "maritime": "Gefahren bei der Überfahrt: Überfahrten erfolgen in oft seeuntüchtigen Booten, ohne Schwimmwesten und mit der Gefahr von Unterkühlung oder Kentern im Dunkeln. Geflüchtete zahlen oft ihre gesamten Ersparnisse für einen Platz auf einem Schlauchboot, ohne zu wissen, ob Rettungsschiffe anlegen dürfen.",
+    "border": "Grenzzäune und Zurückweisungen: Bewachte Grenzzäune mit Stacheldraht, Wärmebildkameras und bewaffneten Patrouillen zwingen Geflüchtete zu wiederholten Überquerungsversuchen. Dabei drohen gewaltsame Zurückweisungen, beschlagnahmte Telefone und Verletzungen.",
+    "terrain": "Extreme Umweltbedingungen: Wer vereiste Gebirgspässe oder glühend heiße Wüsten ohne geeignete Schuhe, Wasser oder Unterkunft zu Fuß überquert, riskiert Erfrierungen, schwere Dehydrierung und Erschöpfung.",
+    "detention": "Menschenrechte und Schutzlosigkeit: Ohne sichere und legale Fluchtwege sind Geflüchtete Menschenhandel, willkürlicher Inhaftierung in heruntergekommenen Lagern und Erpressung durch kriminelle Netzwerke ausgesetzt.",
+    "general": "Jede Flucht über Grenzen ohne gültige Dokumente ist mit psychischer Belastung, Angst vor Festnahme, der Trennung von Familienmitgliedern und unvorhersehbaren Bedingungen verbunden."
+  },
+  "reflectionQuestions": {
+    "1": "Warum könnte sich eine Familie auf der Flucht vor einem Konflikt gezwungen sehen, diesen gefährlichen Weg zu nehmen?",
+    "2": "Wie beeinflusst das Fehlen sicherer und legaler Asylwege die Entscheidungen von Geflüchteten?",
+    "3": "Wohin könnten Fluchtrouten führen, wenn eine Grenze oder ein Seeweg stark blockiert ist?",
+    "4": "Welche psychischen und körperlichen Folgen hätte es für Erwachsene oder Kinder, diesen Hindernissen zu begegnen?"
+  },
+  "units": {
+    "kilometers": "Kilometern",
+    "miles": "Meilen",
+    "meters": "Metern",
+    "nautical-miles": "Seemeilen"
+  }
+}

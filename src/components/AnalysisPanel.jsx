@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 
 export default function AnalysisPanel({
   analysis,
@@ -7,12 +8,63 @@ export default function AnalysisPanel({
   onClose,
   onOpenGuide
 }) {
+  const { t, i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState("perspective");
   const [copied, setCopied] = useState(false);
+  const languageSelectRef = useRef(null);
+
+  useEffect(() => {
+    document.documentElement.lang = i18n.resolvedLanguage?.startsWith("de") ? "de" : "en";
+  }, [i18n.resolvedLanguage]);
+
+  useEffect(() => {
+    const languageSelect = languageSelectRef.current;
+    if (!languageSelect) return;
+
+    const handleLanguageChange = (event) => {
+      i18n.changeLanguage(event.target.value);
+    };
+
+    languageSelect.addEventListener("calciteSelectChange", handleLanguageChange);
+    return () => languageSelect.removeEventListener("calciteSelectChange", handleLanguageChange);
+  }, [i18n]);
+
+  const getLocalizedReport = () => {
+    if (!analysis) return null;
+    const feedback = analysis.perspectiveFeedback;
+    const risk = feedback?.risk;
+
+    return {
+      ...analysis,
+      perspectiveFeedback: feedback
+        ? {
+            ...feedback,
+            risk: risk
+              ? {
+                  ...risk,
+                  level: risk.levelKey ? t(risk.levelKey) : risk.level,
+                  description: risk.descriptionKey ? t(risk.descriptionKey) : risk.description
+                }
+              : risk,
+            narratives: feedback.narrativeKeys?.map((key) => t(key)) || feedback.narratives,
+            reflectionQuestions:
+              feedback.reflectionQuestionKeys?.map((key) => t(key)) || feedback.reflectionQuestions
+          }
+        : feedback
+    };
+  };
+
+  const feedback = analysis?.perspectiveFeedback;
+  const narratives = (feedback?.narrativeKeys || feedback?.narratives || []).map((item) =>
+    feedback?.narrativeKeys ? t(item) : item
+  );
+  const reflectionQuestions = (
+    feedback?.reflectionQuestionKeys || feedback?.reflectionQuestions || []
+  ).map((item) => (feedback?.reflectionQuestionKeys ? t(item) : item));
 
   const handleCopySummary = () => {
     if (!analysis) return;
-    const text = JSON.stringify(analysis, null, 2);
+    const text = JSON.stringify(getLocalizedReport(), null, 2);
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then(() => {
         setCopied(true);
@@ -23,50 +75,64 @@ export default function AnalysisPanel({
 
   const handleDownloadReport = () => {
     if (!analysis) return;
-    const blob = new Blob([JSON.stringify(analysis, null, 2)], {
+    const blob = new Blob([JSON.stringify(getLocalizedReport(), null, 2)], {
       type: "application/json"
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `migration-route-analysis-${Date.now()}.json`;
+    a.download = t("analysis.reportFilename", { timestamp: Date.now() });
     a.click();
     URL.revokeObjectURL(url);
   };
 
   return (
     <calcite-panel
-      heading="Route Analysis & Feedback"
+      heading={t("analysis.title")}
       description={
         analysis
-          ? `Analyzed ${analysis.obstacleCount} obstacle${analysis.obstacleCount === 1 ? "" : "s"} (${config.bufferDistance} ${config.bufferUnit} corridor)`
-          : "Perspective on Refugee Journeys"
+          ? t("analysis.description", {
+              count: analysis.obstacleCount,
+              distance: config.bufferDistance,
+              unit: t(`units.${config.bufferUnit}`)
+            })
+          : t("analysis.subtitle")
       }
       style={{ height: "100%", display: "flex", flexDirection: "column" }}
     >
       <div slot="header-actions-end">
+        <calcite-select
+          ref={languageSelectRef}
+          scale="s"
+          value={i18n.resolvedLanguage?.startsWith("de") ? "de" : "en"}
+          aria-label={t("analysis.language")}
+          title={t("analysis.language")}
+        >
+          <calcite-option value="en">English</calcite-option>
+          <calcite-option value="de">Deutsch</calcite-option>
+        </calcite-select>
         {analysis && (
           <>
             <calcite-action
-              text={copied ? "Copied!" : "Copy Report"}
+              text={copied ? t("analysis.copied") : t("analysis.copyReport")}
               icon={copied ? "check" : "copy-to-clipboard"}
               onClick={handleCopySummary}
-              title="Copy analysis summary to clipboard"
+              title={t("analysis.copyTooltip")}
             />
             <calcite-action
-              text="Download JSON"
+              text={t("analysis.downloadJson")}
               icon="download"
               onClick={handleDownloadReport}
-              title="Download analysis report as JSON"
+              title={t("analysis.downloadTooltip")}
             />
           </>
         )}
         {onClose && (
           <calcite-action
-            text="Close Panel"
+            text={t("analysis.closePanel")}
             icon="x"
             onClick={onClose}
-            title="Collapse Analysis Panel"
+            title={t("analysis.collapsePanel")}
           />
         )}
       </div>
@@ -75,24 +141,24 @@ export default function AnalysisPanel({
         {analyzing && (
           <calcite-scrim
             loading
-            text="Analyzing corridor and intersecting unseen route obstacles..."
+            text={t("analysis.loading")}
           />
         )}
 
         {!analysis && !analyzing && (
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             <calcite-notice open icon="compass" kind="brand">
-              <div slot="title">How to Analyze a Migration Route</div>
+              <div slot="title">{t("guide.title")}</div>
               <div slot="message">
                 <ol style={{ paddingLeft: "1.2rem", margin: "0.5rem 0 0 0" }}>
                   <li style={{ marginBottom: "0.4rem" }}>
-                    <strong>Sketch a Route:</strong> Click the <em>Draw Route Polyline</em> button on the map to trace a route from an origin (e.g., Syria, Afghanistan, Libya) toward a European destination.
+                    <Trans i18nKey="guide.sketch" components={{ strong: <strong />, em: <em /> }} />
                   </li>
                   <li style={{ marginBottom: "0.4rem" }}>
-                    <strong>Run Analysis:</strong> Click the <em>Analyze Route</em> button in the header.
+                    <Trans i18nKey="guide.analyze" components={{ strong: <strong />, em: <em /> }} />
                   </li>
                   <li>
-                    <strong>Take the Perspective of Refugees:</strong> Review the hidden perils, cumulative difficulty weights, and reflective questions to consider the extreme challenges of forced displacement.
+                    <Trans i18nKey="guide.perspective" components={{ strong: <strong /> }} />
                   </li>
                 </ol>
               </div>
@@ -101,14 +167,14 @@ export default function AnalysisPanel({
             <calcite-card style={{ marginTop: "0.5rem" }}>
               <div slot="title" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <calcite-icon icon="lightbulb" scale="s" />
-                <span>Pedagogical Purpose</span>
+                <span>{t("guide.purposeTitle")}</span>
               </div>
               <p style={{ color: "var(--calcite-color-text-2)", fontSize: "0.9rem", lineHeight: "1.5" }}>
-                Refugees fleeing persecution and war face information asymmetry: militarized border fences, pushbacks, maritime perils, and deportation camps are not clearly marked on ordinary maps. By simulating routes against unseen obstacles, students experience the daunting uncertainty faced by displaced persons.
+                {t("guide.purpose")}
               </p>
               <div slot="footer-end">
                 <calcite-button appearance="transparent" scale="s" onClick={onOpenGuide}>
-                  Read Educational Guide
+                  {t("guide.readGuide")}
                 </calcite-button>
               </div>
             </calcite-card>
@@ -132,10 +198,13 @@ export default function AnalysisPanel({
               return (
                 <calcite-notice open kind={kind} icon="exclamation-mark-triangle">
                   <div slot="title" style={{ fontSize: "1.1rem", fontWeight: "600" }}>
-                    {risk?.level || "Analysis Complete"} — Total Difficulty Weight: {analysis.totalWeight}
+                    {t("analysis.riskSummary", {
+                      level: risk?.levelKey ? t(risk.levelKey) : risk?.level || t("analysis.complete"),
+                      weight: analysis.totalWeight
+                    })}
                   </div>
                   <div slot="message" style={{ marginTop: "0.4rem", lineHeight: "1.4" }}>
-                    {risk?.description}
+                    {risk?.descriptionKey ? t(risk.descriptionKey) : risk?.description}
                   </div>
                 </calcite-notice>
               );
@@ -161,7 +230,7 @@ export default function AnalysisPanel({
                   {analysis.obstacleCount}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--calcite-color-text-2)" }}>
-                  Obstacles
+                  {t("analysis.obstacles")}
                 </div>
               </div>
 
@@ -176,7 +245,7 @@ export default function AnalysisPanel({
                   {analysis.totalWeight}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--calcite-color-text-2)" }}>
-                  Cumulative Weight
+                  {t("analysis.cumulativeWeight")}
                 </div>
               </div>
 
@@ -190,10 +259,12 @@ export default function AnalysisPanel({
                 <div style={{ fontSize: "1.4rem", fontWeight: "bold", color: "#dd6b20" }}>
                   {analysis.routeMetrics?.totalLengthKm
                     ? `${analysis.routeMetrics.totalLengthKm} km`
-                    : `${config.bufferDistance} ${config.bufferUnit}`}
+                    : `${config.bufferDistance} ${t(`units.${config.bufferUnit}`)}`}
                 </div>
                 <div style={{ fontSize: "0.75rem", color: "var(--calcite-color-text-2)" }}>
-                  {analysis.routeMetrics?.totalLengthKm ? "Route Length" : "Corridor Width"}
+                  {analysis.routeMetrics?.totalLengthKm
+                    ? t("analysis.routeLength")
+                    : t("analysis.corridorWidth")}
                 </div>
               </div>
             </div>
@@ -206,7 +277,7 @@ export default function AnalysisPanel({
                 scale="s"
                 onClick={() => setActiveTab("perspective")}
               >
-                Refugee Perspective
+                {t("analysis.perspectiveTab")}
               </calcite-button>
               <calcite-button
                 appearance={activeTab === "obstacles" ? "solid" : "outline"}
@@ -214,7 +285,7 @@ export default function AnalysisPanel({
                 scale="s"
                 onClick={() => setActiveTab("obstacles")}
               >
-                Obstacles ({analysis.obstacleCount})
+                {t("analysis.obstacles")} ({analysis.obstacleCount})
               </calcite-button>
               <calcite-button
                 appearance={activeTab === "categories" ? "solid" : "outline"}
@@ -222,7 +293,7 @@ export default function AnalysisPanel({
                 scale="s"
                 onClick={() => setActiveTab("categories")}
               >
-                Categories
+                {t("analysis.categoriesTab")}
               </calcite-button>
             </div>
 
@@ -231,10 +302,10 @@ export default function AnalysisPanel({
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 <div>
                   <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "0.95rem" }}>
-                    The Realities of the Journey
+                    {t("analysis.realitiesHeading")}
                   </h4>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {analysis.perspectiveFeedback?.narratives?.map((item, idx) => (
+                    {narratives.map((item, idx) => (
                       <div
                         key={idx}
                         style={{
@@ -254,13 +325,13 @@ export default function AnalysisPanel({
 
                 <div>
                   <h4 style={{ margin: "0 0 0.5rem 0", fontSize: "0.95rem" }}>
-                    Reflection Questions for Students
+                    {t("analysis.reflectionHeading")}
                   </h4>
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-                    {analysis.perspectiveFeedback?.reflectionQuestions?.map((q, idx) => (
+                    {reflectionQuestions.map((q, idx) => (
                       <calcite-card key={idx} style={{ width: "100%" }}>
                         <div slot="title" style={{ fontSize: "0.85rem", fontWeight: "normal", lineHeight: "1.4" }}>
-                          <strong>Q{idx + 1}:</strong> {q}
+                          <strong>{t("analysis.questionNumber", { number: idx + 1 })}</strong> {q}
                         </div>
                       </calcite-card>
                     ))}
@@ -274,7 +345,10 @@ export default function AnalysisPanel({
               <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                 {analysis.obstacles.length === 0 ? (
                   <p style={{ color: "var(--calcite-color-text-2)", fontStyle: "italic" }}>
-                    No obstacles intersected within the {config.bufferDistance} {config.bufferUnit} corridor.
+                    {t("analysis.noObstacles", {
+                      distance: config.bufferDistance,
+                      unit: t(`units.${config.bufferUnit}`)
+                    })}
                   </p>
                 ) : (
                   analysis.obstacles.map((obs, idx) => (
@@ -296,7 +370,7 @@ export default function AnalysisPanel({
                           {obs.category}
                         </calcite-chip>
                         <calcite-chip scale="s" kind="danger">
-                          Weight: {obs.weight}
+                          {t("analysis.weight", { weight: obs.weight })}
                         </calcite-chip>
                       </div>
                       <p style={{ fontSize: "0.85rem", margin: "0.5rem 0 0.25rem 0", lineHeight: "1.4" }}>
@@ -314,7 +388,7 @@ export default function AnalysisPanel({
                             borderRadius: "4px"
                           }}
                         >
-                          <strong>Perspective:</strong> {obs.perspectiveNote}
+                          <strong>{t("analysis.perspective")}</strong> {obs.perspectiveNote}
                         </div>
                       )}
                     </calcite-card>
@@ -332,7 +406,10 @@ export default function AnalysisPanel({
                       {cat.name}
                     </div>
                     <div slot="subtitle">
-                      {cat.count} obstacle{cat.count === 1 ? "" : "s"} &bull; Total Weight: {cat.totalWeight}
+                      {t("analysis.categorySummary", {
+                        count: cat.count,
+                        weight: cat.totalWeight
+                      })}
                     </div>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginTop: "0.5rem" }}>
                       {cat.obstacles.map((o, oIdx) => (

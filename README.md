@@ -33,6 +33,7 @@ This application challenges students to **take the perspective of refugees**:
   - Full list of intersected obstacles with severity badges and descriptions
 - **Interactive Map Feedback**: Highlights triggered obstacles on the map after analysis, allowing students to click obstacles in the summary to zoom directly to their locations.
 - **Refugee Perspective & Inquiry Prompts**: Structured reflection questions guiding classroom discussions on asylum policies, border closures, and humanitarian needs.
+- **Localization**: English and German interface translations are stored in `src/locales/`; the browser language is detected automatically, and the selected language is remembered.
 - **High Configurability**: WebMap ID, buffer distance, units, layer title, and attribute field names can be configured in:
   1. The built-in **Settings Dialog** (saved in browser `localStorage`)
   2. **URL Query Parameters** (enabling teachers to generate one-click shareable assignment links)

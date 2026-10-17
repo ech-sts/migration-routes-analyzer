@@ -7,7 +7,7 @@ test("DEFAULT_CONFIG has required non-static properties", () => {
   assert.equal(typeof DEFAULT_CONFIG.bufferDistance, "number");
   assert.equal(typeof DEFAULT_CONFIG.bufferUnit, "string");
   assert.equal(typeof DEFAULT_CONFIG.obstacleLayerTitle, "string");
-  assert.equal(DEFAULT_CONFIG.obstacleLayerTitle, "route-obstacles");
+  assert.equal(DEFAULT_CONFIG.obstacleLayerTitle, "Routenschwierigkeiten");
   assert.equal(DEFAULT_CONFIG.bufferDistance > 0, true);
   assert.equal(typeof DEFAULT_CONFIG.weightField, "string");
   assert.equal(typeof DEFAULT_CONFIG.descriptionField, "string");
@@ -40,5 +40,5 @@ test("getConfig merges defaults with query parameters", () => {
   assert.equal(config.webmapId, "abc987");
   assert.equal(config.bufferDistance, 45);
   assert.equal(config.bufferUnit, "kilometers");
-  assert.equal(config.obstacleLayerTitle, "route-obstacles"); // Kept default
+  assert.equal(config.obstacleLayerTitle, "Routenschwierigkeiten");
 });
