@@ -5,6 +5,7 @@ import {
   ensureObstacleLayerHidden,
   extractObstacleAttributes,
   bufferRouteGeometries,
+  buildObstacleIntersectionQuery,
   intersectBufferWithObstacles,
   evaluateJourneyRisk,
   generateRefugeePerspectiveFeedback,
@@ -27,6 +28,24 @@ test("findObstacleLayer finds layer by exact or case-insensitive title", () => {
   const notFound = findObstacleLayer(layers, "non-existent");
   assert.equal(notFound, null);
 });
+
+test("findObstacleLayer finds a child layer in a WebMap group", () => {
+  const groupLayer = { id: "migration-routes", title: "MigrationRoutes" };
+  const obstacleLayer = { id: "obstacles", title: "Routenschwierigkeiten" };
+  const webMap = {
+    layers: { toArray: () => [groupLayer] },
+    allLayers: { toArray: () => [groupLayer, obstacleLayer] }
+  };
+
+  assert.equal(findObstacleLayer(webMap, "Routenschwierigkeiten"), obstacleLayer);
+});
+
+  test("findObstacleLayer prefers the WebMap feature layer over a same-title fallback", () => {
+    const fallbackLayer = { id: "route-obstacles-fallback", title: "Routenschwierigkeiten", type: "geojson" };
+    const featureLayer = { id: "webmap-obstacles", title: "Routenschwierigkeiten", type: "feature" };
+
+    assert.equal(findObstacleLayer([fallbackLayer, featureLayer], "Routenschwierigkeiten"), featureLayer);
+  });
 
 test("ensureObstacleLayerHidden sets layer.visible to false", () => {
   const layer = { id: "route-obstacles", visible: true, listMode: "show" };
@@ -85,7 +104,25 @@ test("bufferRouteGeometries calls geodesicBuffer on geometryEngine", () => {
   assert.equal(res.type, "polygon");
 });
 
-test("intersectBufferWithObstacles correctly filters and sorts by weight descending", () => {
+test("buildObstacleIntersectionQuery requests intersecting features in buffer spatial reference", () => {
+  const bufferGeometry = { type: "polygon", spatialReference: { wkid: 3857 } };
+  const layer = {
+    createQuery() {
+      return { where: "existing filter" };
+    }
+  };
+
+  const query = buildObstacleIntersectionQuery(layer, bufferGeometry);
+
+  assert.equal(query.where, "1=1");
+  assert.equal(query.geometry, bufferGeometry);
+  assert.equal(query.spatialRelationship, "intersects");
+  assert.equal(query.returnGeometry, true);
+  assert.deepEqual(query.outFields, ["*"]);
+  assert.equal(query.outSpatialReference, bufferGeometry.spatialReference);
+});
+
+test("intersectBufferWithObstacles filters without ranking obstacles by weight", () => {
   const mockEngine = {
     intersects(buffer, geom) {
       return geom.shouldIntersect === true;
@@ -110,19 +147,18 @@ test("intersectBufferWithObstacles correctly filters and sorts by weight descend
 
   const results = intersectBufferWithObstacles(dummyBuffer, features, mockEngine, DEFAULT_CONFIG);
   assert.equal(results.length, 2);
-  // Checked sorting by weight descending
-  assert.equal(results[0].title, "Severe Risk Obstacle");
-  assert.equal(results[0].weight, 9);
-  assert.equal(results[1].title, "Low Risk Obstacle");
-  assert.equal(results[1].weight, 3);
+  assert.equal(results[0].title, "Low Risk Obstacle");
+  assert.equal(results[0].weight, 3);
+  assert.equal(results[1].title, "Severe Risk Obstacle");
+  assert.equal(results[1].weight, 9);
 });
 
 test("evaluateJourneyRisk calculates appropriate risk level and styling", () => {
-  assert.equal(evaluateJourneyRisk(0).level, "Minimal Risk");
-  assert.equal(evaluateJourneyRisk(10).level, "Low Risk");
-  assert.equal(evaluateJourneyRisk(25).level, "Moderate Risk");
-  assert.equal(evaluateJourneyRisk(50).level, "High Risk");
-  assert.equal(evaluateJourneyRisk(75).level, "Critical Peril");
+  assert.equal(evaluateJourneyRisk(0).levelKey, "risk.levels.minimal");
+  assert.equal(evaluateJourneyRisk(10).levelKey, "risk.levels.low");
+  assert.equal(evaluateJourneyRisk(25).levelKey, "risk.levels.moderate");
+  assert.equal(evaluateJourneyRisk(50).levelKey, "risk.levels.high");
+  assert.equal(evaluateJourneyRisk(75).levelKey, "risk.levels.critical");
 });
 
 test("summarizeRouteAnalysis generates consolidated summary with refugee perspective feedback", () => {
@@ -144,23 +180,51 @@ test("summarizeRouteAnalysis generates consolidated summary with refugee perspec
   const summary = summarizeRouteAnalysis(obstacles, DEFAULT_CONFIG, { routeCount: 1, totalLengthKm: 420.5 });
 
   assert.equal(summary.obstacleCount, 2);
-  assert.equal(summary.totalWeight, 18);
-  assert.equal(summary.averageWeight, 9);
-  assert.equal(summary.maxWeight, 10);
-  assert.equal(summary.perspectiveFeedback.risk.level, "Moderate Risk");
+  assert.equal("totalWeight" in summary, false);
+  assert.equal("averageWeight" in summary, false);
+  assert.equal("maxWeight" in summary, false);
+  assert.equal("risk" in summary.perspectiveFeedback, false);
+  assert.equal(summary.perspectiveFeedback.categories.some((category) => "totalWeight" in category), false);
   assert.equal(summary.perspectiveFeedback.categories.length, 2);
-  assert.equal(summary.perspectiveFeedback.narratives.length > 0, true);
-  assert.equal(summary.perspectiveFeedback.reflectionQuestions.length, 4);
+  assert.equal(summary.perspectiveFeedback.narrativeKeys.length > 0, true);
+  assert.equal(summary.perspectiveFeedback.reflectionQuestionKeys.length, 4);
 });
 
 test("summarizeRouteAnalysis handles empty obstacles cleanly", () => {
   const summary = summarizeRouteAnalysis([], DEFAULT_CONFIG, { routeCount: 0 });
   assert.equal(summary.obstacleCount, 0);
-  assert.equal(summary.totalWeight, 0);
-  assert.equal(summary.averageWeight, 0);
-  assert.equal(summary.maxWeight, 0);
-  assert.equal(summary.perspectiveFeedback.risk.level, "Minimal Risk");
+  assert.equal("risk" in summary.perspectiveFeedback, false);
   assert.equal(summary.perspectiveFeedback.categories.length, 0);
+});
+
+test("route feedback does not depend on obstacle weights or risk thresholds", () => {
+  const obstacles = [{ title: "Crossing", category: "Maritime", weight: 1 }];
+  const feedback = generateRefugeePerspectiveFeedback(obstacles, 1);
+  const changedFeedback = generateRefugeePerspectiveFeedback(
+    [{ ...obstacles[0], weight: 1000 }],
+    1000,
+    { riskThresholds: { low: 0, moderate: 0, high: 0 } }
+  );
+
+  assert.deepEqual(changedFeedback.narrativeKeys, feedback.narrativeKeys);
+  assert.deepEqual(changedFeedback.reflectionQuestionKeys, feedback.reflectionQuestionKeys);
+  assert.equal("risk" in changedFeedback, false);
+  assert.equal("totalWeight" in changedFeedback.categories[0], false);
+});
+
+test("extractObstacleAttributes uses the configured titleField before fallback titles", () => {
+  const obstacle = extractObstacleAttributes(
+    { attributes: { ObstacleTitle: "Grenzuebergang", title: "Fallback", Description: "Beschreibung" } },
+    { ...DEFAULT_CONFIG, titleField: "ObstacleTitle" }
+  );
+
+  assert.equal(obstacle.title, "Grenzuebergang");
+  assert.equal(obstacle.description, "Beschreibung");
+});
+
+test("summarizeRouteAnalysis preserves a zero route length", () => {
+  const summary = summarizeRouteAnalysis([], DEFAULT_CONFIG, { totalLengthKm: 0 });
+  assert.equal(summary.routeMetrics.totalLengthKm, 0);
 });
 
 test("extractObstacleAttributes handles missing or invalid values gracefully", () => {

@@ -1,0 +1,78 @@
+{
+  "analysis": {
+    "title": "Route Analysis & Feedback",
+    "subtitle": "Perspective on Refugee Journeys",
+    "description_one": "Analyzed {{count}} obstacle ({{distance}} {{unit}} corridor)",
+    "description_other": "Analyzed {{count}} obstacles ({{distance}} {{unit}} corridor)",
+    "language": "Language",
+    "copyReport": "Copy Report",
+    "copied": "Copied!",
+    "copyTooltip": "Copy analysis summary to clipboard",
+    "downloadJson": "Download JSON",
+    "downloadTooltip": "Download analysis report as JSON",
+    "closePanel": "Close Panel",
+    "collapsePanel": "Collapse Analysis Panel",
+    "loading": "Analyzing corridor and intersecting unseen route obstacles...",
+    "reportFilename": "migration-route-analysis-{{timestamp}}.json",
+    "complete": "Analysis complete",
+    "riskSummary": "{{level}} — Total Difficulty Weight: {{weight}}",
+    "obstacles": "Obstacles",
+    "cumulativeWeight": "Cumulative Weight",
+    "routeLength": "Route Length",
+    "corridorWidth": "Corridor Width",
+    "perspectiveTab": "Refugee Perspective",
+    "categoriesTab": "Categories",
+    "realitiesHeading": "The Realities of the Journey",
+    "reflectionHeading": "Reflection Questions for Students",
+    "questionNumber": "Q{{number}}:",
+    "noObstacles": "No obstacles intersected within the {{distance}} {{unit}} corridor.",
+    "weight": "Weight: {{weight}}",
+    "perspective": "Perspective:",
+    "categorySummary_one": "{{count}} obstacle",
+    "categorySummary_other": "{{count}} obstacles"
+  },
+  "guide": {
+    "title": "How to Analyze a Migration Route",
+    "sketch": "<strong>Sketch a Route:</strong> Click the <em>Draw Route Polyline</em> button on the map to trace a route from an origin (e.g., Syria, Afghanistan, Libya) toward a European destination.",
+    "analyze": "<strong>Run Analysis:</strong> Click the <em>Analyze Route</em> button in the header.",
+    "perspective": "<strong>Take the Perspective of Refugees:</strong> Consider the documented obstacles and reflection questions to understand the challenges and uncertainties of forced displacement. Every journey to safety carries risks, regardless of the obstacles recorded here.",
+    "purposeTitle": "Pedagogical Purpose",
+    "purpose": "Refugees fleeing persecution and war face information asymmetry: militarized border fences, pushbacks, maritime perils, and deportation camps are not clearly marked on ordinary maps. By simulating routes against unseen obstacles, students experience the daunting uncertainty faced by displaced persons.",
+    "readGuide": "Read Educational Guide"
+  },
+  "risk": {
+    "levels": {
+      "minimal": "Minimal Risk",
+      "low": "Low Risk",
+      "moderate": "Moderate Risk",
+      "high": "High Risk",
+      "critical": "Critical Peril"
+    },
+    "descriptions": {
+      "minimal": "No significant documented obstacles were encountered within the route corridor. Note that unexpected checkpoints or shifting border controls may still occur.",
+      "low": "Relatively low concentration of major documented obstacles, though refugees still face physical exhaustion, precarious legal status, and unexpected border changes.",
+      "moderate": "Significant barriers encountered. Journeys along this corridor present hazardous terrain, active border interdictions, or risky transit conditions requiring dangerous detours.",
+      "high": "Severe perils present. Multiple life-threatening hazards (open sea, militarized borders, or desert corridors) with documented humanitarian crises and human rights violations.",
+      "critical": "Extreme, multi-tiered danger. This corridor traverses several of the deadliest checkpoints and crossing points on migration journeys into Europe, with very high risks of fatality, violence, or prolonged detention."
+    }
+  },
+  "narratives": {
+    "maritime": "Maritime Crossing Reality: Sea crossings involve unseaworthy vessels, no life vests, hypothermia, and fear of capsizing in darkness. Refugees often pay their life savings for a spot on a dinghy without knowing if rescue ships are allowed to dock.",
+    "border": "Border Wall & Pushback Reality: Militarized border fences with razor wire, thermal cameras, and armed patrols mean refugees must repeatedly attempt crossings ('The Game'), facing violent pushbacks, confiscated phones, and physical injuries.",
+    "terrain": "Harsh Environmental Reality: Crossing freezing mountain passes or blistering deserts on foot without adequate shoes, water, or shelter leads to frostbite, trench foot, severe dehydration, and exhaustion.",
+    "detention": "Human Rights & Vulnerability Reality: Without safe, legal escape routes, refugees are vulnerable to human trafficking, arbitrary detention in squalid camps, and extortion by organized criminal networks.",
+    "general": "Every journey across borders without legal documentation carries psychological stress, fear of apprehension, separation from family members, and reliance on unpredictable conditions."
+  },
+  "reflectionQuestions": {
+    "1": "Why might a family fleeing conflict feel they have no choice but to take this dangerous route?",
+    "2": "How does the lack of safe and legal asylum pathways affect the decisions refugees must make?",
+    "3": "If one border or maritime corridor is heavily blocked, where do you think refugee flows divert?",
+    "4": "What psychological and physical toll would encountering these obstacles take on a person or child?"
+  },
+  "units": {
+    "kilometers": "kilometers",
+    "miles": "miles",
+    "meters": "meters",
+    "nautical-miles": "nautical miles"
+  }
+}

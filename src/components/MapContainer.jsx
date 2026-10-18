@@ -11,6 +11,7 @@ import { sampleObstacles } from "../sample-obstacles.js";
 import {
   findObstacleLayer,
   ensureObstacleLayerHidden,
+  buildObstacleIntersectionQuery,
   bufferRouteGeometries,
   intersectBufferWithObstacles,
   summarizeRouteAnalysis
@@ -47,6 +48,12 @@ const MapContainer = forwardRef(function MapContainer(
     async analyze() {
       if (!routesLayerRef.current || !viewRef.current) {
         throw new Error("Map or sketch layer is not initialized yet.");
+      }
+
+      try {
+        await viewRef.current.map.loadAll();
+      } catch (loadErr) {
+        console.warn("Could not load every WebMap layer before analysis:", loadErr);
       }
 
       const routeGraphics = routesLayerRef.current.graphics
@@ -100,52 +107,26 @@ const MapContainer = forwardRef(function MapContainer(
       }
 
       // 3. Query obstacle layer
-      let obstacleLayer = obstacleLayerRef.current;
-      if (!obstacleLayer) {
-        obstacleLayer = findObstacleLayer(
-          viewRef.current.map,
-          config.obstacleLayerTitle
-        );
-        obstacleLayerRef.current = obstacleLayer;
-      }
+      const obstacleLayer =
+        findObstacleLayer(viewRef.current.map, config.obstacleLayerTitle) ||
+        obstacleLayerRef.current;
+      obstacleLayerRef.current = obstacleLayer;
 
       let features = [];
       if (obstacleLayer) {
         ensureObstacleLayerHidden(obstacleLayer);
         try {
           if (typeof obstacleLayer.queryFeatures === "function") {
-            const query = obstacleLayer.createQuery
-              ? obstacleLayer.createQuery()
-              : { where: "1=1", returnGeometry: true, outFields: ["*"] };
-            query.where = "1=1";
-            query.returnGeometry = true;
-            query.outFields = ["*"];
+            const query = buildObstacleIntersectionQuery(obstacleLayer, bufferPolygon);
             const res = await obstacleLayer.queryFeatures(query);
             features = res.features || [];
           } else if (obstacleLayer.graphics) {
             features = obstacleLayer.graphics.toArray();
           }
         } catch (queryErr) {
-          console.warn("Could not query layer features, using sample dataset:", queryErr);
+          console.warn("Could not query obstacle layer:", queryErr);
+          throw new Error(`Could not query obstacle layer: ${queryErr.message}`);
         }
-      }
-
-      // If no layer or query returned empty, fall back to sample obstacles
-      if (features.length === 0 && sampleObstacles.features) {
-        features = sampleObstacles.features.map((f, idx) => {
-          return new Graphic({
-            geometry: {
-              type: "point",
-              longitude: f.geometry.coordinates[0],
-              latitude: f.geometry.coordinates[1],
-              spatialReference: { wkid: 4326 }
-            },
-            attributes: {
-              OBJECTID: idx + 1,
-              ...f.properties
-            }
-          });
-        });
       }
 
       // 4. Intersect buffer with obstacles
@@ -153,7 +134,8 @@ const MapContainer = forwardRef(function MapContainer(
         bufferPolygon,
         features,
         geometryEngine,
-        config
+        config,
+        { prefiltered: Boolean(obstacleLayer?.queryFeatures) }
       );
 
       // 5. Highlight intersected obstacles
@@ -229,6 +211,12 @@ const MapContainer = forwardRef(function MapContainer(
     async function initializeLayers(view) {
       if (destroyed || !view || !view.map) return;
       viewRef.current = view;
+
+      try {
+        await view.map.loadAll();
+      } catch (loadErr) {
+        console.warn("Could not load every WebMap layer before obstacle discovery:", loadErr);
+      }
 
       // Ensure view padding and UI elements
       view.ui.move("zoom", "top-left");
